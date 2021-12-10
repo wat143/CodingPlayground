@@ -270,7 +270,7 @@ gl.clearDepth(1.0);
 var prg = createShader();
 var attLocation = new Array(2);
 attLocation[0] = gl.getAttribLocation(prg, 'position');
-attLocation[0] = gl.getAttribLocation(prg, 'color');
+attLocation[1] = gl.getAttribLocation(prg, 'color');
 var attStride = new Array(2);
 attStride[0] = 3;
 attStride[1] = 4;
@@ -306,19 +306,42 @@ var m = new matIV;
 var mMatrix = m.identity(m.create());   // matrix for model conversion
 var vMatrix = m.identity(m.create());   // matrix for view conversion
 var pMatrix = m.identity(m.create());   // matrix for projection conversion
+var tmpMatrix = m.identity(m.create());
 var mvpMatrix = m.identity(m.create()); // MVP matrix for uniform in VS
 
-m.lookAt([0.0, 1.0, 3.0], [0, 0, 0], [0, 1, 0], vMatrix);
+m.lookAt([0.0, 0.0, 3.0], [0, 0, 0], [0, 1, 0], vMatrix);
 m.perspective(90, 300 / 300, 0.1, 100, pMatrix);
 
 // Convert MVP. p->v->m order 
-m.multiply(pMatrix, vMatrix, mvpMatrix);
-m.multiply(mvpMatrix, mMatrix, mvpMatrix);
+m.multiply(pMatrix, vMatrix, tmpMatrix);
 
-// Set mvp matrix to VS
+// For 1st matrix 
+m.translate(mMatrix, [1.0, 0.0, 1.0], mMatrix);
+m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+
+//Set mvp matrix to VS
 var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
 gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
-
 // Draw triangle
 gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+// For 2nd matrix 
+m.translate(mMatrix, [-2.0, 0.0, 0.0], mMatrix);
+m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+//Set mvp matrix to VS
+var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
+gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
+// Draw triangle
+gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+// For 3rd matrix 
+m.translate(mMatrix, [1.0, 1.0, 0.0], mMatrix);
+m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+//Set mvp matrix to VS
+var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
+gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
+// Draw triangle
+gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+// Apply current context 
 gl.flush();
