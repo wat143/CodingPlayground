@@ -329,11 +329,14 @@ m.multiply(pMatrix, vMatrix, tmpMatrix);
 
 var count = 0;
 function render() {
-    // Clear Context 
-    gl.clearColor(1.0, 1.0, 1.0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    // Clear DEPTH
+    // Clear color and depth 
+    gl.clearColor(0, 0, 0, 0);
     gl.clearDepth(1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
+    // Enable depth test 
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
     
     count++;
     var rad = (count % 360) * Math.PI / 180;
@@ -342,7 +345,21 @@ function render() {
    
     ///////////// For 1st matrix 
     m.identity(mMatrix);
-    m.translate(mMatrix, [x + 1.0, y, 1.0], mMatrix);
+    m.translate(mMatrix, [y * 2, 0, x], mMatrix);
+    m.rotate(mMatrix, rad, [0, 1, 0], mMatrix);
+    m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+    
+    //Set mvp matrix to VS
+    var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
+    gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
+    
+    // Draw triangle
+    gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
+    
+    ///////////// For 2nd matrix 
+    m.identity(mMatrix);
+    m.translate(mMatrix, [x * 2, 0, y], mMatrix);
+    m.rotate(mMatrix, rad, [1, 0, 0], mMatrix);
     m.multiply(tmpMatrix, mMatrix, mvpMatrix);
     
     //Set mvp matrix to VS
