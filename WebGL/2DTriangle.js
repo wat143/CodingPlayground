@@ -258,14 +258,6 @@ function createVBO(data) {
     return vbo;
 }
 
-
-// Clear Context 
-gl.clearColor(1.0, 1.0, 1.0, 1.0);
-gl.clear(gl.COLOR_BUFFER_BIT);
-
-// Clear DEPTH
-gl.clearDepth(1.0);
-
 // Create program 
 var prg = createShader();
 var attLocation = new Array(2);
@@ -315,33 +307,51 @@ m.perspective(90, 300 / 300, 0.1, 100, pMatrix);
 // Convert MVP. p->v->m order 
 m.multiply(pMatrix, vMatrix, tmpMatrix);
 
-// For 1st matrix 
-m.translate(mMatrix, [1.0, 0.0, 1.0], mMatrix);
-m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+var count = 0;
+function render() {
+    // Clear Context 
+    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    // Clear DEPTH
+    gl.clearDepth(1.0);
+    
+    count++;
+    var rad = (count % 360) * Math.PI / 180;
+    var x = Math.cos(rad);
+    var y = Math.sin(rad);
+   
 
-//Set mvp matrix to VS
-var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
-gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
-// Draw triangle
-gl.drawArrays(gl.TRIANGLES, 0, 3);
-
-// For 2nd matrix 
-m.translate(mMatrix, [-2.0, 0.0, 0.0], mMatrix);
-m.multiply(tmpMatrix, mMatrix, mvpMatrix);
-//Set mvp matrix to VS
-var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
-gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
-// Draw triangle
-gl.drawArrays(gl.TRIANGLES, 0, 3);
-
-// For 3rd matrix 
-m.translate(mMatrix, [1.0, 1.0, 0.0], mMatrix);
-m.multiply(tmpMatrix, mMatrix, mvpMatrix);
-//Set mvp matrix to VS
-var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
-gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
-// Draw triangle
-gl.drawArrays(gl.TRIANGLES, 0, 3);
-
-// Apply current context 
-gl.flush();
+    ///////////// For 1st matrix 
+    m.identity(mMatrix);
+    m.translate(mMatrix, [x + 1.0, y, 1.0], mMatrix);
+    m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+    
+    //Set mvp matrix to VS
+    var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
+    gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
+    // Draw triangle
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    
+    //////////// For 2nd matrix 
+    m.identity(mMatrix);
+    m.translate(mMatrix, [x - 2.0, 0.0, 0.0], mMatrix);
+    m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+    //Set mvp matrix to VS
+    var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
+    gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
+    // Draw triangle
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    
+    //////////// For 3rd matrix 
+    m.identity(mMatrix);
+    m.translate(mMatrix, [1.0 - x, 1.0, 0.0], mMatrix);
+    m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+    //Set mvp matrix to VS
+    var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
+    gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
+    // Draw triangle
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    
+    //////////// Apply current context 
+    gl.flush();
+}
