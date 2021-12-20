@@ -215,7 +215,7 @@ function matIV(){
 
 
 // Shader sources 
-vert = 'attribute vec3 position; attribute vec4 color; uniform mat4 mvpMatrix; varying vec4 vColor; void main() { vColor = color; gl_Position = mvpMatrix * vec4(position, 1.0);}'
+vert = 'attribute vec3 position; attribute vec3 normal; attribute vec4 color; uniform mat4 mvpMatrix; uniform mat4 invMatrix; uniform vec3 lightDirection; varying vec4 vColor; void main(void) { vec3 invLight = normalize(invMatrix * vec4(lightDirection, 0.0)).xyz; float diffuse = clamp(dot(normal, invLight), 0.1, 1.0); vColor = color * vec4(vec3(diffuse), 1.0); gl_Position = mvpMatrix * vec4(position, 1.0);}'
 frag = 'precision mediump float; varying vec4 vColor; void main() { gl_FragColor = vColor; }'
 
 // Create shader function 
@@ -269,12 +269,14 @@ function createIBO(data) {
 
 // Create program 
 var prg = createShader();
-var attLocation = new Array(2);
+var attLocation = new Array(3);
 attLocation[0] = gl.getAttribLocation(prg, 'position');
-attLocation[1] = gl.getAttribLocation(prg, 'color');
-var attStride = new Array(2);
+attLocation[1] = gl.getAttribLocation(prg, 'normal');
+attLocation[2] = gl.getAttribLocation(prg, 'color');
+var attStride = new Array(3);
 attStride[0] = 3;
-attStride[1] = 4;
+attStride[1] = 3;
+attStride[2] = 4;
 
 // HSV color function
 function hsva(h, s, v, a){
@@ -299,7 +301,8 @@ function hsva(h, s, v, a){
 
 // Create array
 function torus(row, column, irad, orad){
-    var pos = new Array(), col = new Array(), idx = new Array();
+    var pos = new Array(), nor = new Array(),
+        col = new Array(), idx = new Array();
     for(var i = 0; i <= row; i++){
         var r = Math.PI * 2 / row * i;
         var rr = Math.cos(r);
@@ -309,7 +312,10 @@ function torus(row, column, irad, orad){
             var tx = (rr * irad + orad) * Math.cos(tr);
             var ty = ry * irad;
             var tz = (rr * irad + orad) * Math.sin(tr);
+            var rx = rr * Math.cos(tr);
+            var rz = rr * Math.sin(tr);
             pos.push(tx, ty, tz);
+            nor.push(rx, ry, rz);
             var tc = hsva(360 / column * ii, 1, 1, 1);
             col.push(tc[0], tc[1], tc[2], tc[3]);
         }
@@ -321,14 +327,15 @@ function torus(row, column, irad, orad){
             idx.push(r + column + 1, r + column + 2, r + 1);
         }
     }
-    return [pos, col, idx];
+    return [pos, nor, col, idx];
 }
 
 // Vertex posiion which will be bound to vbo
 var torus_data = torus(32, 32, 1.0, 2.0);
 var vertex_position = torus_data[0];
-var vertex_color = torus_data[1];
-var index = torus_data[2];
+var normal = torus_data[1];
+var vertex_color = torus_data[2];
+var index = torus_data[3];
 
 // Create vbo
 var position_vbo = createVBO(vertex_position);
@@ -336,14 +343,25 @@ gl.bindBuffer(gl.ARRAY_BUFFER, position_vbo);
 gl.enableVertexAttribArray(attLocation[0]);
 gl.vertexAttribPointer(attLocation[0], attStride[0], gl.FLOAT, false, 0, 0);
 
-var color_vbo = createVBO(vertex_color);
-gl.bindBuffer(gl.ARRAY_BUFFER, color_vbo);
+var normal_vbo = createVBO(normal);
+gl.bindBuffer(gl.ARRAY_BUFFER, normal_vbo);
 gl.enableVertexAttribArray(attLocation[1]);
 gl.vertexAttribPointer(attLocation[1], attStride[1], gl.FLOAT, false, 0, 0);
+
+var color_vbo = createVBO(vertex_color);
+gl.bindBuffer(gl.ARRAY_BUFFER, color_vbo);
+gl.enableVertexAttribArray(attLocation[2]);
+gl.vertexAttribPointer(attLocation[2], attStride[2], gl.FLOAT, false, 0, 0);
 
 // Create IBO 
 var ibo = createIBO(index);
 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+
+// Create uniform array
+var uniformLocation = new Array();
+uniformLocation[0] = gl.getUniformLocation(prg, 'mvpMatrix');
+uniformLocation[1] = gl.getUniformLocation(prg, 'invMatrix');
+uniformLocation[2] = gl.getUniformLocation(prg, 'lightDirection');
 
 // Create mvpMatrix
 var m = new matIV;
@@ -352,7 +370,8 @@ var vMatrix = m.identity(m.create());   // matrix for view conversion
 var pMatrix = m.identity(m.create());   // matrix for projection conversion
 var tmpMatrix = m.identity(m.create());
 var mvpMatrix = m.identity(m.create()); // MVP matrix for uniform in VS
-
+var invMatrix = m.identity(m.create()); // Inverse matrix for lighthing, uniform attrib of VS
+var lightDirection = [-0.5, 0.5, 0.5]; // Light direction, uniform attrib of VS. Shine the light from (-0.5, 0.5, 0.5). 
 m.lookAt([0.0, 0.0, 20.0], [0, 0, 0], [0, 1, 0], vMatrix);
 m.perspective(45, 300 / 300, 0.1, 100, pMatrix);
 
@@ -380,9 +399,13 @@ function render() {
     m.rotate(mMatrix, rad, [0, 1, 1], mMatrix);
     m.multiply(tmpMatrix, mMatrix, mvpMatrix);
     
+    // Update inverse matrix
+    m.inverse(mMatrix, invMatrix);
+    
     //Set mvp matrix to VS
-    var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
-    gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
+    gl.uniformMatrix4fv(uniformLocation[0], false, mvpMatrix);
+    gl.uniformMatrix4fv(uniformLocation[1], false, invMatrix);
+    gl.uniform3fv(uniformLocation[2], lightDirection);
     
     // Draw triangle
     gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
