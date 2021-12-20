@@ -215,7 +215,7 @@ function matIV(){
 
 
 // Shader sources 
-vert = 'attribute vec3 position; attribute vec3 normal; attribute vec4 color; uniform mat4 mvpMatrix; uniform mat4 invMatrix; uniform vec3 lightDirection; uniform vec4 ambientLight; varying vec4 vColor; void main(void) { vec3 invLight = normalize(invMatrix * vec4(lightDirection, 0.0)).xyz; float diffuse = clamp(dot(normal, invLight), 0.0, 1.0); vColor = color * vec4(vec3(diffuse), 1.0) + ambientLight; gl_Position = mvpMatrix * vec4(position, 1.0);}'
+vert = 'attribute vec3 position; attribute vec3 normal; attribute vec4 color; uniform mat4 mvpMatrix; uniform mat4 invMatrix; uniform vec3 lightDirection; uniform vec3 eyeDirection; uniform vec4 ambientLight; varying vec4 vColor; void main(void) { vec3 invLight = normalize(invMatrix * vec4(lightDirection, 0.0)).xyz; vec3 invEye = normalize(invMatrix * vec4(eyeDirection, 0.0)).xyz; vec3 halfLE = normalize(invLight + invEye); float diffuse = clamp(dot(normal, invLight), 0.0, 1.0); float specular = pow(clamp(dot(normal, halfLE), 0.0, 1.0), 50.0); vec4 light = color * vec4(vec3(diffuse), 1.0) + vec4(vec3(specular), 1.0); vColor = light + ambientLight; gl_Position = mvpMatrix * vec4(position, 1.0);}'
 frag = 'precision mediump float; varying vec4 vColor; void main() { gl_FragColor = vColor; }'
 
 // Create shader function 
@@ -362,7 +362,8 @@ var uniformLocation = new Array();
 uniformLocation[0] = gl.getUniformLocation(prg, 'mvpMatrix');
 uniformLocation[1] = gl.getUniformLocation(prg, 'invMatrix');
 uniformLocation[2] = gl.getUniformLocation(prg, 'lightDirection');
-uniformLocation[3] = gl.getUniformLocation(prg, 'ambientLight');
+uniformLocation[3] = gl.getUniformLocation(prg, 'eyeDirection');
+uniformLocation[4] = gl.getUniformLocation(prg, 'ambientLight');
 
 // Create mvpMatrix
 var m = new matIV;
@@ -373,7 +374,8 @@ var tmpMatrix = m.identity(m.create());
 var mvpMatrix = m.identity(m.create()); // MVP matrix for uniform in VS
 var invMatrix = m.identity(m.create()); // Inverse matrix for lighthing, uniform attrib of VS
 var lightDirection = [-0.5, 0.5, 0.5]; // Light direction, uniform attrib of VS. Shine the light from (-0.5, 0.5, 0.5). 
-var ambientColor = [0.1, 0.1, 0.1, 1.0];
+var ambientColor = [0.1, 0.1, 0.1, 1.0]; 
+var eyeDirection = [0.0, 0.0, 20.0]; // Eye direction for specular 
 m.lookAt([0.0, 0.0, 20.0], [0, 0, 0], [0, 1, 0], vMatrix);
 m.perspective(45, 300 / 300, 0.1, 100, pMatrix);
 
@@ -408,7 +410,8 @@ function render() {
     gl.uniformMatrix4fv(uniformLocation[0], false, mvpMatrix);
     gl.uniformMatrix4fv(uniformLocation[1], false, invMatrix);
     gl.uniform3fv(uniformLocation[2], lightDirection);
-    gl.uniform4fv(uniformLocation[3], ambientColor);
+    gl.uniform3fv(uniformLocation[3], eyeDirection);
+    gl.uniform4fv(uniformLocation[4], ambientColor);
     
     // Draw triangle
     gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
