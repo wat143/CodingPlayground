@@ -30,3 +30,22 @@ public:
         }
     }
 };
+
+int main() {
+    int n, q;
+    cin >> n >> q;
+    UnionFind un(n);
+    for (int i = 0; i < q; i++) {
+        int p, a, b;
+        cin >> p >> a >> b;
+        if (p == 0)
+            un.unite(a, b);
+        else {
+            if (un.sameRoot(a, b))
+                cout << "Yes" << endl;
+            else
+                cout << "No" << endl;
+        }
+    }
+    return 0;
+}
