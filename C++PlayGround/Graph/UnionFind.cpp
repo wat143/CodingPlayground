@@ -12,7 +12,8 @@ public:
     };
     int root(int x) {
         if (tree[x] == x) return x;
-        else return tree[x] = root(x);
+        else
+            return tree[x] = root(tree[x]);
     }
     bool sameRoot(int x, int y) {
         return root(x) == root(y);
