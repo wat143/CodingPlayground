@@ -4,19 +4,18 @@
 #include <GL/glew.h>
 
 #include <glfw3.h>
-GLFWwindow* window;	
+
 
 #include <glm/glm.hpp>
 using namespace glm;
 
-int main( void )
-{
+GLFWwindow* initGLFW_Window(int width, int height, char *window_name) {
 	// Initialise GLFW
 	if( !glfwInit() )
 	{
 		fprintf( stderr, "Failed to initialize GLFW\n" );
 		getchar();
-		return -1;
+		return nullptr;
 	}
 
     glfwWindowHint(GLFW_SAMPLES, 4);
@@ -24,27 +23,39 @@ int main( void )
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 
-
     // Open a window and create its OpenGL context
-	window = glfwCreateWindow( 1024, 768, "Playground", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, window_name, NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		getchar();
 		glfwTerminate();
-		return -1;
+		return nullptr;
 	}
 	glfwMakeContextCurrent(window);
+	return window;
+}
 
+bool initGLEW(GLFWwindow *window) {
 	// Initialize GLEW
 	if (glewInit() != GLEW_OK) {
 		fprintf(stderr, "Failed to initialize GLEW\n");
 		getchar();
 		glfwTerminate();
-		return -1;
+		return false;
 	}
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+	return true;
+}
+
+int main( void )
+{
+	GLFWwindow* window = initGLFW_Window(1024, 768, "Playground");
+	if (window == nullptr)
+		return -1;
+	if(!initGLEW(window))
+		return -1;
 
 	// Dark blue background
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
