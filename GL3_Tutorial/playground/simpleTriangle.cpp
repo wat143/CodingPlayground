@@ -79,7 +79,7 @@ int main( void )
 	glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
 
 	// Load shaders and get attributes, uniform
-	program = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
+	program = LoadShaders("SimpleVertexShader.vs", "SimpleFragmentShader.fs");
 	attr[vert_modelspace] = glGetAttribLocation(program, vert_modelspace);
 	attr[vertColor] = glGetAttribLocation(program, vertColor);
 	umvp = glGetUniformLocation(program, "MVP");
