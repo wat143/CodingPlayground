@@ -56,18 +56,18 @@ add_definitions(
 	-D_CRT_SECURE_NO_WARNINGS
 )
 
-# User playground
-add_executable(playground 
-	playground/playground.cpp
+# User simpleTriangle
+add_executable(simpleTriangle 
+	playground/simpleTriangle.cpp
 	common/shader.cpp
 	common/shader.hpp
 )
-target_link_libraries(playground
+target_link_libraries(simpleTriangle
 	${ALL_LIBS}
 )
 # Xcode and Visual working directories
-set_target_properties(playground PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/playground/")
-create_target_launcher(playground WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/playground/")
+set_target_properties(simpleTriangle PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/playground/")
+create_target_launcher(simpleTriangle WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/playground/")
 
 
 
@@ -77,8 +77,8 @@ SOURCE_GROUP(shaders REGULAR_EXPRESSION ".*/.*shader$" )
 
 if (NOT ${CMAKE_GENERATOR} MATCHES "Xcode" )
 add_custom_command(
-   TARGET playground POST_BUILD
-   COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/playground${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_CURRENT_SOURCE_DIR}/playground/"
+   TARGET simpleTriangle POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/simpleTriangle${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_CURRENT_SOURCE_DIR}/playground/"
 )
 
 elseif (${CMAKE_GENERATOR} MATCHES "Xcode" )
