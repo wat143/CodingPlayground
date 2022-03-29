@@ -58,11 +58,14 @@ int main( void )
 {
 	GLuint cnt = 0;
 	GLfloat vertex[][3] = {{-1.0f, -1.0f, 0.0f},
-							{1.0f, -1.0f, 0.0f},
-							{0.0f, 1.0f, 0.0f}};
-	GLfloat uv[][2] = {{0.0f, 0.0f},
+							{-1.0f, 1.0f, 0.0f},
+                            {1.0f, 1.0f, 0.0f},
+							{1.0f, -1.0f, 0.0f}};
+
+    GLfloat uv[][2] = {{0.0f, 1.0f},
+                        {0.0f, 0.0f},
 						{1.0f, 0.0f},
-						{0.5f, 1.0f}};
+						{1.0f, 1.0f}};
 	GLuint buff[2], program, umvp;
 	map<GLchar*, GLuint> attr;
 	GLchar *vert_modelspace = "vertexPosition_modelspace", *vertUV = "UV";
@@ -87,7 +90,7 @@ int main( void )
 
     // Load texture
     GLuint texture = loadDDS("uvtemplate.DDS");
-    GLuint texID = glGetUniformLocation(program, "myTextureSampler");
+    GLuint utexture = glGetUniformLocation(program, "myTextureSampler");
     glBindTexture(GL_TEXTURE_2D, texture);
 
 	// Dark blue background
@@ -106,7 +109,7 @@ int main( void )
 		mat4 m = rotate(mat4(1.0), rad, vec3(0, 1, 0));
 		mat4 v = lookAt(vec3(0, 0, 5), vec3(0, 0, 0), vec3(0, 1, 0));
 		mat4 p = perspective(radians(45.0f), 4.0f/3.0f, 0.1f, 100.0f);
-		mat4 mvp = p * v * m;
+		mat4 mvp = p * v * mat4(1.0f);
 		// Apply mvp matrix to uniform location
 		glUniformMatrix4fv(umvp, 1, GL_FALSE, &mvp[0][0]);
 		// Draw nothing, see you in tutorial 2 !
@@ -117,9 +120,9 @@ int main( void )
 		glBindBuffer(GL_ARRAY_BUFFER, buff[1]);
 		glVertexAttribPointer(attr[vertUV], 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
         // Apply texture
-        glUniform1i(texID, 0);
+        glUniform1i(utexture, 0);
     	// Draw triangle
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
         // Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
