@@ -85,3 +85,34 @@ elseif (${CMAKE_GENERATOR} MATCHES "Xcode" )
 
 endif (NOT ${CMAKE_GENERATOR} MATCHES "Xcode" )
 
+# User simpleTriangle
+add_executable(simpleTexture
+	playground/simpleTexture.cpp
+	common/shader.cpp
+	common/shader.hpp
+	common/texture.cpp
+	common/texture.hpp
+)
+target_link_libraries(simpleTexture
+	${ALL_LIBS}
+)
+# Xcode and Visual working directories
+set_target_properties(simpleTexture PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/playground/")
+create_target_launcher(simpleTexture WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/playground/")
+
+
+
+SOURCE_GROUP(common REGULAR_EXPRESSION ".*/common/.*" )
+SOURCE_GROUP(shaders REGULAR_EXPRESSION ".*/.*shader$" )
+
+
+if (NOT ${CMAKE_GENERATOR} MATCHES "Xcode" )
+add_custom_command(
+   TARGET simpleTexture POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/simpleTexture${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_CURRENT_SOURCE_DIR}/playground/"
+)
+
+elseif (${CMAKE_GENERATOR} MATCHES "Xcode" )
+
+endif (NOT ${CMAKE_GENERATOR} MATCHES "Xcode" )
+
