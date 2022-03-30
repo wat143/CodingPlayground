@@ -25,11 +25,20 @@ void main(){
     // normalize value
     vec3 n = normalize(vertexNormal_cameraspace);
     vec3 l = normalize(lightDirection_cameraspace);
+    float cosTheta = clamp(dot(n, l), 0, 1);
     // Distance between vertex and light
     vec3 vertexPosition_worldspace = (M * vec4(vertexPosition_modelspace, 1)).xyz;
     float dist = length(lightPosition - vertexPosition_worldspace);
-    float cosTheta = clamp(dot(n, l), 0, 1);
+    // Ambient color
     vec3 AmbientColor = 0.1 * vertexColor;
-    fragmentColor = (lightPower * vertexColor * lightColor * cosTheta) / (dist * dist) + AmbientColor;
+    // Specular color
+    vec3 EyeVector = normalize(eyeDirection_cameraspace);
+    vec3 R = reflect(-l, n);
+    float cosAlpha = clamp(dot(EyeVector, R), 0, 1);
+    vec3 MaterialSpecularColor = vec3(0.5, 0.5, 0.5);
+    // Output color
+    fragmentColor = (vertexColor * lightPower * lightColor * cosTheta) / (dist * dist) +
+                    (MaterialSpecularColor * lightPower * lightColor * pow(cosAlpha, 5) / (dist * dist))
+                    + AmbientColor;
     
 }
