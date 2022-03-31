@@ -15,19 +15,19 @@ out vec3 lightDirection_cameraspace;
 out vec3 lightPosition_vertex;
 
 void main(){
-    gl_Position = MVP * vec4(vertexPosition_modelspace, 1);
+	gl_Position = MVP * vec4(vertexPosition_modelspace, 1);
 
-    // Vertex position in cameraspace. V * M * vertex
-    vec3 vertexPosition_cameraspace = (V * M * vec4(vertexPosition_modelspace, 1.0)).xyz;
+	// Vertex position in cameraspace. V * M * vertex
+	vec3 vertexPosition_cameraspace = (V * M * vec4(vertexPosition_modelspace, 1.0)).xyz;
 
-    // light direction to vertex
-    vec3 lightPosition_cameraspace = (V * vec4(lightPosition, 1.0)).xyz;
+	// light direction to vertex
+	vec3 lightPosition_cameraspace = (V * vec4(lightPosition, 1.0)).xyz;
 
-    // Varing variables
-    vertexPosition_worldspace = (M * vec4(vertexPosition_modelspace, 1)).xyz;
-    vertColor = vertexColor;
-    vertexNormal_cameraspace = (V * M * vec4(vertexNormal_modelspace, 0)).xyz;    
-    eyeDirection_cameraspace = vec3(0, 0, 0) - vertexPosition_cameraspace;
-    lightDirection_cameraspace = eyeDirection_cameraspace + lightPosition_cameraspace;
-    lightPosition_vertex = lightPosition;
+	// Varing variables
+	vertexPosition_worldspace = (M * vec4(vertexPosition_modelspace, 1)).xyz;
+	vertColor = vertexColor;
+	vertexNormal_cameraspace = (V * M * vec4(vertexNormal_modelspace, 0)).xyz;
+	eyeDirection_cameraspace = vec3(0, 0, 0) - vertexPosition_cameraspace;
+	lightDirection_cameraspace = eyeDirection_cameraspace + lightPosition_cameraspace;
+	lightPosition_vertex = lightPosition;
 }

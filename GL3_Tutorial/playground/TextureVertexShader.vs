@@ -7,7 +7,7 @@ out vec2 V_UV;
 
 void main(){
 
-    gl_Position = MVP * vec4(vertexPosition_modelspace, 1);
-    V_UV = UV;
+	gl_Position = MVP * vec4(vertexPosition_modelspace, 1);
+	V_UV = UV;
 
 }

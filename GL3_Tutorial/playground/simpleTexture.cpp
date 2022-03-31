@@ -23,12 +23,12 @@ GLFWwindow* initGLFW_Window(int width, int height, char *window_name) {
 		return nullptr;
 	}
 
-    glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_RESIZABLE,GL_FALSE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 
-    // Open a window and create its OpenGL context
+	// Open a window and create its OpenGL context
 	GLFWwindow* window = glfwCreateWindow(width, height, window_name, NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
@@ -59,11 +59,11 @@ int main( void )
 	GLuint cnt = 0;
 	GLfloat vertex[][3] = {{-1.0f, -1.0f, 0.0f},
 							{-1.0f, 1.0f, 0.0f},
-                            {1.0f, 1.0f, 0.0f},
+							{1.0f, 1.0f, 0.0f},
 							{1.0f, -1.0f, 0.0f}};
 
-    GLfloat uv[][2] = {{0.0f, 1.0f},
-                        {0.0f, 0.0f},
+	GLfloat uv[][2] = {{0.0f, 1.0f},
+						{0.0f, 0.0f},
 						{1.0f, 0.0f},
 						{1.0f, 1.0f}};
 	GLuint buff[2], program, umvp;
@@ -88,17 +88,17 @@ int main( void )
 	attr[vertUV] = glGetAttribLocation(program, vertUV);
 	umvp = glGetUniformLocation(program, "MVP");
 
-    // Load texture
-    GLuint texture = loadDDS("uvtemplate.DDS");
-    GLuint utexture = glGetUniformLocation(program, "myTextureSampler");
-    glBindTexture(GL_TEXTURE_2D, texture);
+	// Load texture
+	GLuint texture = loadDDS("uvtemplate.DDS");
+	GLuint utexture = glGetUniformLocation(program, "myTextureSampler");
+	glBindTexture(GL_TEXTURE_2D, texture);
 
 	// Dark blue background
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
 	// Enable shader
 	glUseProgram(program);
-    // Enable depth test
+	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
 	do{
 		cnt++;
@@ -119,23 +119,23 @@ int main( void )
 		glEnableVertexAttribArray(attr[vertUV]);
 		glBindBuffer(GL_ARRAY_BUFFER, buff[1]);
 		glVertexAttribPointer(attr[vertUV], 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-        // Apply texture
-        glUniform1i(utexture, 0);
-    	// Draw triangle
+		// Apply texture
+		glUniform1i(utexture, 0);
+		// Draw triangle
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-        // Swap buffers
+		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		// Wait 8.3msec for 120fps
 		usleep(8330);
 
-    } // Check if the ESC key was pressed or the window was closed
+	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 		   glfwWindowShouldClose(window) == 0 );
 
-    // Close OpenGL window and terminate GLFW
-    glfwTerminate();
+	// Close OpenGL window and terminate GLFW
+	glfwTerminate();
 
-    return 0;
+	return 0;
 }
 
