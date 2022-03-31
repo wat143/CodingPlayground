@@ -11,7 +11,7 @@ out vec3 color;
 void main(){
     // Light color = white
     vec3 lightColor = vec3(1, 1, 1);
-    float lightPower = 100;
+    float lightPower = 60;
     // Distance between vertex and light
     float dist = length(lightPosition_vertex - vertexPosition_worldspace);
     // Ambient color
@@ -26,9 +26,8 @@ void main(){
     float cosAlpha = clamp(dot(EyeVector, R), 0, 1);
     vec3 MaterialSpecularColor = vec3(0.5, 0.5, 0.5);
     // Output color
-    color = vertColor * lightColor * cosTheta;
-//    color = (vertColor * lightPower * lightColor * cosTheta) / (dist * dist) +
-//            (MaterialSpecularColor * lightPower * lightColor * pow(cosAlpha, 5) / (dist * dist))
-//            + AmbientColor;
+    color = (vertColor * lightPower * lightColor * cosTheta) / (dist * dist) +
+            (MaterialSpecularColor * lightPower * lightColor * pow(cosAlpha, 5) / (dist * dist))
+            + AmbientColor;
     
 }
