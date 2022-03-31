@@ -135,7 +135,7 @@ int main( void )
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexNormal), vertexNormal, GL_STATIC_DRAW);
 
 	// Load shaders and get attributes, uniform
-	program = LoadShaders("LightingVertexShader.vs", "SimpleFragmentShader.fs");
+	program = LoadShaders("PhongShading.vs", "PhongShading.fs");
 	attr[vert_modelspace] = glGetAttribLocation(program, vert_modelspace);
 	attr[vertColor] = glGetAttribLocation(program, vertColor);
     attr[vert_normal] = glGetAttribLocation(program, vert_normal);
