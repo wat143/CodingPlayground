@@ -663,8 +663,8 @@ var eyeDirection = [0.0, 0.0, 20.0]; // Eye direction for specular
 m.perspective(45, 300 / 300, 0.1, 100, pMatrix);
 
 var count = 0;
-var camPositionIni = [0.0, 0.0, 10.0];
-var camUpDirectionIni = [0.0, 1.0, 0.0];
+var camPositionIni = [0.0, 0.0, 15.0];
+var camUpDirectionIni = [1.0, 1.0, 1.0];
 
 // Enable depth test 
 gl.enable(gl.DEPTH_TEST);
@@ -688,14 +688,13 @@ function render() {
     var camPosition = [0.0, 0.0, 0.0];
     var camUpDirection = [0.0, 0.0, 0.0];
     q.rotate(rad, [1, 0, 0], xQuartenion);
-    q.toVecIII(camPositionIni, xQuartenion, camPosition);
-    q.toVecIII(camUpDirectionIni, xQuartenion, camUpDirection);
     
     // Calculate view matrix
-    m.lookAt(camPosition, [0, 0, 0], camUpDirection, vMatrix);
+    m.lookAt(camPositionIni, [0, 0, 0], camUpDirectionIni, vMatrix);
     m.multiply(pMatrix, vMatrix, tmpMatrix);
     ///////////// 
     m.identity(mMatrix);
+    q.toMatIV(xQuartenion, mMatrix);
     m.multiply(tmpMatrix, mMatrix, mvpMatrix);
     
     // Update inverse matrix
