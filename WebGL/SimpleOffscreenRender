@@ -286,6 +286,54 @@ function createFramebuffer(renderBuffer, texture) {
     return frameBuffer;
 }
 
+function render_cube_offscreen(prg, rad, position_vbo, color_vbo, ibo, index, attLocation, attStride, mMatrix, tmpMatrix, mvpMatrix) {
+    //// Not rendering to offscreen buffer so far
+    // Enable VBO for position and color
+    gl.bindBuffer(gl.ARRAY_BUFFER, position_vbo);
+    gl.enableVertexAttribArray(attLocation[0]);
+    gl.vertexAttribPointer(attLocation[0], attStride[0], gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, color_vbo)
+    gl.enableVertexAttribArray(attLocation[1]);
+    gl.vertexAttribPointer(attLocation[1], attStride[1], gl.FLOAT, false, 0, 0);
+    // Calculate model space and creat MVP matrix 
+    m.identity(mMatrix);
+    m.identity(mvpMatrix);
+    m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
+    m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+
+    //Set mvp matrix to VS
+    var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
+    gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
+    // Draw triangle
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+    gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
+    // Unbind VBOs
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+
+function render_cube(prg, position_vbo, color_vbo, ibo, index, attLocation, attStride, mMatrix, tmpMatrix, mvpMatrix) {
+    // Set position and color vbos to VS
+    gl.bindBuffer(gl.ARRAY_BUFFER, position_vbo);
+    gl.enableVertexAttribArray(attLocation[0]);
+    gl.vertexAttribPointer(attLocation[0], attStride[0], gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, color_vbo);
+    gl.enableVertexAttribArray(attLocation[1]);
+    gl.vertexAttribPointer(attLocation[1], attStride[1], gl.FLOAT, false, 0, 0);
+    // Calculate model matrix. This cube doesn't rotate.    
+    m.identity(mMatrix);
+    m.identity(mvpMatrix);
+    m.multiply(tmpMatrix, mMatrix, mvpMatrix);
+    // Get mvp matrix uniform location and set matrix
+    var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
+    gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+    gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
+    // Unbind buffers
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+
 // Create program 
 var prg = createShader();
 var attLocation = new Array(2);
@@ -334,17 +382,9 @@ var vertex_color = [
     0.0, 1.0, 0.0, 1.0
 ];
 
-// Create vbo
-var position_vbo = createVBO(vertex_position);
-gl.bindBuffer(gl.ARRAY_BUFFER, position_vbo);
-gl.enableVertexAttribArray(attLocation[0]);
-gl.vertexAttribPointer(attLocation[0], attStride[0], gl.FLOAT, false, 0, 0);
-
-var color_vbo = createVBO(vertex_color);
-gl.bindBuffer(gl.ARRAY_BUFFER, color_vbo);
-gl.enableVertexAttribArray(attLocation[1]);
-gl.vertexAttribPointer(attLocation[1], attStride[1], gl.FLOAT, false, 0, 0);
-
+// Create vbo for cube
+var position_vbo_cube = createVBO(vertex_position);
+var color_vbo_cube = createVBO(vertex_color);
 var ibo = createIBO(index);
 
 // Create mvpMatrix
@@ -369,21 +409,13 @@ function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     // Clear DEPTH
     gl.clearDepth(1.0);
-    
+    // Calculate radian for rotation
     count++;
     var rad = (count % 360) * Math.PI / 180;
-
-    ///////////// For 1st matrix 
-    m.identity(mMatrix);
-    m.rotate(mMatrix, rad, [1.0, 1.0, 0.0], mMatrix);
-    m.multiply(tmpMatrix, mMatrix, mvpMatrix);
-
-    //Set mvp matrix to VS
-    var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
-    gl.uniformMatrix4fv(uniformLocation, false, mvpMatrix);
-    // Draw triangle
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
-    gl.drawElements(gl.TRIANGLES, index.length, gl.UNSIGNED_SHORT, 0);
+    // Offscreen render
+    render_cube_offscreen(prg, rad, position_vbo_cube, color_vbo_cube, ibo, index, attLocation, attStride, mMatrix, tmpMatrix, mvpMatrix);
+    // Render cube
+    render_cube(prg, position_vbo_cube, color_vbo_cube, ibo, index, attLocation, attStride, mMatrix, tmpMatrix, mvpMatrix);
     //////////// Apply current context 
     gl.flush();
 }
