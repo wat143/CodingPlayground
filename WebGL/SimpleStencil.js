@@ -294,7 +294,6 @@ gl.vertexAttribPointer(attLocation[1], attStride[1], gl.FLOAT, false, 0, 0);
 
 // Create mvpMatrix
 var m = new matIV;
-// 各種行列の生成と初期化
 var mMatrix = m.identity(m.create());   // matrix for model conversion
 var vMatrix = m.identity(m.create());   // matrix for view conversion
 var pMatrix = m.identity(m.create());   // matrix for projection conversion
@@ -327,8 +326,8 @@ function render() {
     m.translate(mMatrix, [y, y, -0.75], mMatrix);
     m.multiply(tmpMatrix, mMatrix, mvpMatrix);
     // Stencil test 
-    gl.stencilFunc(gl.ALWAYS, 1, ~0);
-    gl.stencilOp(gl.KEEP, gl.REPLACE, gl.REPLACE);
+    gl.stencilFunc(gl.ALWAYS, 1, 0xff);
+    gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
     
     //Set mvp matrix to VS
     var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
@@ -338,11 +337,11 @@ function render() {
     
     //////////// For 2nd matrix 
     m.identity(mMatrix);
-    m.translate(mMatrix, [x - 2.0, 0.0, 0.5], mMatrix);
+    m.translate(mMatrix, [x - 2.0, 0.0, -0.5], mMatrix);
     m.multiply(tmpMatrix, mMatrix, mvpMatrix);
     // Stencil test 
-    gl.stencilFunc(gl.ALWAYS, 0, ~0);
-    gl.stencilOp(gl.KEEP, gl.INCR, gl.INCR);
+    gl.stencilFunc(gl.EQUAL, 1, 0xff);
+    gl.stencilOp(gl.KEEP, gl.KEEP, gl.INCR);
     
     //Set mvp matrix to VS
     var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
@@ -355,7 +354,7 @@ function render() {
     m.translate(mMatrix, [0.5 - x, 0.0, 0.0], mMatrix);
     m.multiply(tmpMatrix, mMatrix, mvpMatrix);
     // Stencil test 
-    gl.stencilFunc(gl.EQUAL, 1, ~0);
+    gl.stencilFunc(gl.EQUAL, 2, 0xff);
     gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
     //Set mvp matrix to VS
     var uniformLocation = gl.getUniformLocation(prg, "mvpMatrix");
