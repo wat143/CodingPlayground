@@ -277,13 +277,32 @@ function createRenderbuffer(data) {
 }
 
 // Create FRAMEBUFFER_BINDING
-function createFramebuffer(renderBuffer, texture) {
-    var framebuffer = gl.createFramebuffer();
-    gl.bindBuffer(gl.FRAMEBUFFER, framebuffer);
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, renderBuffer);
-    gl.framebufferTexture2D(gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-    gl.bindBuffer(gl.FRAMEBUFFER, null);
-    return frameBuffer;
+function create_Framebuffer(width, height) {
+    // create framebuffer and bind
+    var frameBuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+    // create render buffer as depth buffer and bind
+    var renderDepth = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, renderDepth);
+    // define render buffer as depth buffer
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+    // bind frame buffer and render buffer
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderDepth);
+    // create texture for framebuffer
+    var fTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, fTexture);
+    // alloc memory for frame buffer texture
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    // texture parameter
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    // Bind framebuffer and texture
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fTexture, 0);
+    // unbound
+    gl.bindRenderBuffer(gl.RENDERBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    return {f:frameBuffer, r:renderDepth, t:fTexture};
 }
 
 function render_cube_offscreen(prg, rad, position_vbo, color_vbo, ibo, index, attLocation, attStride, mMatrix, tmpMatrix, mvpMatrix) {
